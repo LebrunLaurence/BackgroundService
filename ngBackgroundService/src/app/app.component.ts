@@ -27,23 +27,36 @@ export class AppComponent {
 
   // Ajouter une variable nbWins
 
+  nbWins:number = 0;
+
   private hubConnection?: signalR.HubConnection
 
   isConnected = false;
   nbClicks = 0;
   // TODO: Ajouter 3 variables: Le multiplier, le multiplierCost, mais également le multiplierIntialCost pour remettre à jour multiplierCost après chaque fin de round (ou sinon on peut passer l'information dans l'appel qui vient du Hub!)
 
+  mulitplierCost:number = 0;
+  multiplicateur = 1;
+  multiplicateurInit = 0;
+
   constructor(public account:AccountService){
   }
 
   Increment() {
     //TODO: Augmenter le nbClicks par la valeur du multiplicateur
-    this.nbClicks += 1;
+    this.nbClicks += this.multiplicateur;
     this.hubConnection!.invoke('Increment')
   }
 
   BuyMultiplier() {
     // TODO: Implémenter la méthode qui permet d'acheter un niveau de multiplier (Appel au Hub!)
+    if(this.nbClicks < this.mulitplierCost)
+      return
+
+    this.hubConnection?.invoke('BuyMulti');
+    this.nbClicks -= this.mulitplierCost;
+    this.mulitplierCost = this.mulitplierCost * 2;
+    this.multiplicateur = this.multiplicateur * 2;
   }
 
   async register(){
@@ -87,13 +100,24 @@ export class AppComponent {
     this.hubConnection.on('GameInfo', (data:GameInfo) => {
       this.isConnected = true;
       // TODO: Mettre à jour les variables pour le coût du multiplier et le nbWins
+      this.nbWins = data.nbWins;
+      this.mulitplierCost = data.multiplierCost;
+      this.multiplicateurInit =  data.multiplierCost;
     });
 
     this.hubConnection.on('EndRound', (data:RoundResult) => {
       this.nbClicks = 0;
       // TODO: Reset du multiplierCost et le multiplier
+      this.multiplicateur = 1;
+      this.mulitplierCost = this.multiplicateurInit;
 
       // TODO: Si le joueur a gagné, on augmene nbWins
+
+      let winners:string[] = data.winners;
+
+      if(winners.filter(x => x == this.account.username).length > 0){
+          this.nbWins++;
+      }
 
       if(data.nbClicks > 0){
         let phrase = " a gagné avec ";

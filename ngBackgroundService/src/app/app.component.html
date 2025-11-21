@@ -28,13 +28,14 @@
     </div>
     <div *ngIf="isConnected">
 
-      <div >Connecté! <!-- TODO: Afficher le nb de wins--></div>
+      <div >Connecté! Vous avez eu {{nbWins}} victoire</div>
       <br>
       <div>
         <button mat-raised-button color="primary" (click)="Increment()">Cliquer</button>
         Clicks dans ce round: <b>{{nbClicks}}</b>
       </div>
-      <!-- Permettre d'acheter un multiplier et afficher le multiplier actuel -->
+      <button mat-raised-button color="primary" (click)="BuyMultiplier()">Acheter pour {{mulitplierCost}}</button>
+        Multiplicateur : {{multiplicateur}}
     </div>
   </div>
 </div>
